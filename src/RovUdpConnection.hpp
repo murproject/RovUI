@@ -20,5 +20,7 @@ private:
     void onDatareceived();
 
     const quint16 m_port = 3010;
+    const QHostAddress m_rovIp;
+    const quint16 m_rovPort = 3020;
     QScopedPointer<QUdpSocket> m_socket;
 };

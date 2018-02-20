@@ -13,12 +13,16 @@ SfJoystickSettingsDialog::SfJoystickSettingsDialog(QWidget* parent)
     , m_zAxisList(new QComboBox(this))
     , m_servoXList(new QComboBox(this))
     , m_servoYList(new QComboBox(this))
+    , m_openManipulatorList(new QComboBox(this))
+    , m_closeManipulatorList(new QComboBox(this))
+    , m_rotateManipulatorList(new QComboBox(this))
     , m_wAxisInv(new QCheckBox(this))
     , m_xAxisInv(new QCheckBox(this))
     , m_yAxisInv(new QCheckBox(this))
     , m_zAxisInv(new QCheckBox(this))
     , m_servoXInv(new QCheckBox(this))
     , m_servoYInv(new QCheckBox(this))
+    , m_manipulatorInv(new QCheckBox(this))
 
 {
     readSettings();
@@ -148,6 +152,52 @@ void SfJoystickSettingsDialog::setServoYAxis(sf::Joystick::Axis axis, bool inver
     m_settings->endGroup();
 }
 
+sf::Joystick::Axis SfJoystickSettingsDialog::manipulatorAxis()
+{
+    return m_manipulatorAxis;
+}
+
+bool SfJoystickSettingsDialog::isManipulatorInvese()
+{
+    return m_isManipulatorInv;
+}
+
+void SfJoystickSettingsDialog::setManipulatorAxis(sf::Joystick::Axis axis, bool inverse)
+{
+    m_settings->beginGroup("Joystick");
+    m_settings->setValue("JoystickManipulatorAxis", static_cast<int>(axis));
+    m_settings->setValue("JoystickManipulatorAxisInv", inverse);
+    m_manipulatorAxis = axis;
+    m_isManipulatorInv = inverse;
+    m_settings->endGroup();
+}
+
+int SfJoystickSettingsDialog::manipulatorOpenButton()
+{
+    return m_openButton;
+}
+
+void SfJoystickSettingsDialog::setOpenButton(int button)
+{
+    m_settings->beginGroup("Joystick");
+    m_settings->setValue("JoystickOpenButton", button);
+    m_openButton = button;
+    m_settings->endGroup();
+}
+
+int SfJoystickSettingsDialog::manipulatorCloseButton()
+{
+    return m_closeButton;
+}
+
+void SfJoystickSettingsDialog::setCloseButton(int button)
+{
+    m_settings->beginGroup("Joystick");
+    m_settings->setValue("JoystickCloseButton", button);
+    m_closeButton = button;
+    m_settings->endGroup();
+}
+
 void SfJoystickSettingsDialog::readSettings()
 {
     sf::Joystick::update();
@@ -159,6 +209,7 @@ void SfJoystickSettingsDialog::readSettings()
     m_zAxis = static_cast<sf::Joystick::Axis>(m_settings->value("JoystickAxisZ", static_cast<int>(sf::Joystick::Axis::Z)).toInt());
     m_servoXAxis = static_cast<sf::Joystick::Axis>(m_settings->value("JoystickServoXAxis", static_cast<int>(sf::Joystick::Axis::PovX)).toInt());
     m_servoYAxis = static_cast<sf::Joystick::Axis>(m_settings->value("JoystickServoYAxis", static_cast<int>(sf::Joystick::Axis::PovY)).toInt());
+    m_manipulatorAxis = static_cast<sf::Joystick::Axis>(m_settings->value("JoystickManipulatorAxis", static_cast<int>(sf::Joystick::Axis::U)).toInt());
 
     m_isWInv = m_settings->value("JoystickAxisWIsInv", false).toBool();
     m_wAxisInv.data()->setChecked(m_isWInv);
@@ -172,6 +223,11 @@ void SfJoystickSettingsDialog::readSettings()
     m_servoXInv.data()->setChecked(m_isServoXInv);
     m_isServoYInv = m_settings->value("JoystickServoYAxisInv", false).toBool();
     m_servoYInv.data()->setChecked(m_isServoYInv);
+    m_isManipulatorInv = m_settings->value("JoystickManipulatorAxisInv", false).toBool();
+    m_manipulatorInv->setChecked(m_isManipulatorInv);
+
+    m_openButton = m_settings->value("JoystickOpenButton", 1).toInt();
+    m_closeButton = m_settings->value("JoystickCloseButton", 0).toInt();
 
     m_settings->endGroup();
 }
@@ -189,9 +245,23 @@ void SfJoystickSettingsDialog::createLayout()
         layout->addLayout(hLayout);
     };
 
+    auto addButtonsToLayout = [](QComboBox* box, QString lName, QVBoxLayout* layout) {
+        QHBoxLayout* hLayout = new QHBoxLayout;
+        QLabel* name = new QLabel(lName);
+        hLayout->addWidget(name);
+        hLayout->addWidget(box);
+        layout->addLayout(hLayout);
+    };
+
     auto createBox = [this](QComboBox* box) {
         for (size_t axis = 0; axis < sf::Joystick::AxisCount; ++axis) {
             box->addItem(QString("Ось #%1").arg(axis));
+        }
+    };
+
+    auto createButtonBox = [this](QComboBox* box) {
+        for (size_t buttons = 0; buttons < sf::Joystick::getButtonCount(0); ++buttons) {
+            box->addItem(QString("Копка #%1").arg(buttons));
         }
     };
 
@@ -201,6 +271,9 @@ void SfJoystickSettingsDialog::createLayout()
     createBox(m_zAxisList.data());
     createBox(m_servoXList.data());
     createBox(m_servoYList.data());
+    createBox(m_rotateManipulatorList.data());
+    createButtonBox(m_openManipulatorList.data());
+    createButtonBox(m_closeManipulatorList.data());
 
     addToLayout(m_wAxisList.data(), QString(tr("Тяга на ось W:")), layout, m_wAxisInv.data());
     addToLayout(m_xAxisList.data(), QString(tr("Тяга на ось X:")), layout, m_xAxisInv.data());
@@ -208,6 +281,9 @@ void SfJoystickSettingsDialog::createLayout()
     addToLayout(m_zAxisList.data(), QString(tr("Тяга на ось Z:")), layout, m_zAxisInv.data());
     addToLayout(m_servoXList.data(), QString(tr("Тяга на сервопривод 1:")), layout, m_servoXInv.data());
     addToLayout(m_servoYList.data(), QString(tr("Тяга на сервопривод 2:")), layout, m_servoYInv.data());
+    addToLayout(m_rotateManipulatorList.data(), QString(tr("Поворот манипулятора:")), layout, m_manipulatorInv.data());
+    addButtonsToLayout(m_openManipulatorList.data(), QString(tr("Открыть манипулятор:")), layout);
+    addButtonsToLayout(m_closeManipulatorList.data(), QString(tr("Закрыть манипулятор:")), layout);
 
     m_wAxisList.data()->setCurrentIndex(static_cast<int>(wAxis()));
     m_xAxisList.data()->setCurrentIndex(static_cast<int>(xAxis()));
@@ -215,7 +291,7 @@ void SfJoystickSettingsDialog::createLayout()
     m_zAxisList.data()->setCurrentIndex(static_cast<int>(zAxis()));
     m_servoXList.data()->setCurrentIndex(static_cast<int>(servoXAxis()));
     m_servoYList.data()->setCurrentIndex(static_cast<int>(servoYAxis()));
-
+    m_rotateManipulatorList.data()->setCurrentIndex(static_cast<int>(manipulatorAxis()));
     setLayout(layout);
 }
 
@@ -243,6 +319,18 @@ void SfJoystickSettingsDialog::createConnections()
 
     QObject::connect(m_servoYList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         this->setServoYAxis(static_cast<sf::Joystick::Axis>(index), m_servoYInv.data()->isChecked());
+    });
+    //!
+    QObject::connect(m_rotateManipulatorList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+        this->setManipulatorAxis(static_cast<sf::Joystick::Axis>(index), m_manipulatorInv.data()->isChecked());
+    });
+
+    QObject::connect(m_openManipulatorList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+        this->setOpenButton(index);
+    });
+
+    QObject::connect(m_closeManipulatorList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+        this->setCloseButton(index);
     });
 
     QObject::connect(m_wAxisInv.data(), &QCheckBox::stateChanged, [this](int index) {
@@ -273,5 +361,10 @@ void SfJoystickSettingsDialog::createConnections()
     QObject::connect(m_servoYInv.data(), &QCheckBox::stateChanged, [this](int index) {
         Q_UNUSED(index)
         this->setZAxis(static_cast<sf::Joystick::Axis>(m_servoYList.data()->currentIndex()), m_servoYInv.data()->isChecked());
+    });
+
+    QObject::connect(m_manipulatorInv.data(), &QCheckBox::stateChanged, [this](int index) {
+        Q_UNUSED(index)
+        this->setManipulatorAxis(static_cast<sf::Joystick::Axis>(m_rotateManipulatorList.data()->currentIndex()), m_manipulatorInv.data()->isChecked());
     });
 }

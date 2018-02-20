@@ -29,6 +29,7 @@ struct RovControl {
         in << axisY;
         in << axisZ;
         in << axisW;
+        in << debugFlag;
         for (qint8 t : thrusterPower) {
             in << t;
         }
@@ -41,7 +42,7 @@ struct RovControl {
         in << desiredDepth;
         in << calculateCRC(ba.data(), ba.size());
 
-        return QByteArray();
+        return ba;
     }
 };
 Q_DECLARE_METATYPE(RovControl)

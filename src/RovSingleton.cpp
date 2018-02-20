@@ -59,7 +59,6 @@ void RovSingleton::createConnections()
             m_controlData.axisX *= m_scaleFactor;
             m_controlData.axisZ *= m_scaleFactor;
             m_controlData.axisY *= m_scaleFactor;
-
             m_udpConnection->transmitDatagram(m_controlData.toRangerControlMsg());
         }
     });

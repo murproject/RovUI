@@ -2,7 +2,9 @@
 
 RovUdpConnection::RovUdpConnection(QObject* parent)
     : QObject(parent)
+    , m_rovIp("192.168.1.5")
     , m_socket(new QUdpSocket(this))
+
 {
     connect(m_socket.data(), &QUdpSocket::readyRead, this,
         &RovUdpConnection::onDatareceived);
@@ -13,7 +15,7 @@ RovUdpConnection::~RovUdpConnection() {}
 
 void RovUdpConnection::transmitDatagram(QByteArray datagram)
 {
-    m_socket->writeDatagram(datagram, QHostAddress("192.168.0.5"), 3020);
+    m_socket->writeDatagram(datagram, m_rovIp, m_rovPort);
 }
 
 void RovUdpConnection::onDatareceived()

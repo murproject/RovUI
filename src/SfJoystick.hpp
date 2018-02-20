@@ -37,6 +37,9 @@ private:
     int m_w = 0;
     int m_servoX = 0;
     int m_servoY = 0;
+    int m_manipulatorRotate = 0;
+    int m_openManipulator = 0;
+    int m_closeManipulator = 0;
 
     enum { MinAxisValue = 10 };
 
