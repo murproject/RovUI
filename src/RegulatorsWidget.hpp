@@ -1,5 +1,4 @@
-#ifndef REGULATORSWIDGET_HPP
-#define REGULATORSWIDGET_HPP
+#pragma once
 
 #include <QCheckBox>
 #include <QWidget>
@@ -18,5 +17,3 @@ private:
 
     QScopedPointer<QCheckBox> m_depthRegulator;
 };
-
-#endif // REGULATORSWIDGET_HPP

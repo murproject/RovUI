@@ -320,7 +320,7 @@ void SfJoystickSettingsDialog::createConnections()
     QObject::connect(m_servoYList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         this->setServoYAxis(static_cast<sf::Joystick::Axis>(index), m_servoYInv.data()->isChecked());
     });
-    //!
+
     QObject::connect(m_rotateManipulatorList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         this->setManipulatorAxis(static_cast<sf::Joystick::Axis>(index), m_manipulatorInv.data()->isChecked());
     });

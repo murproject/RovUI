@@ -1,6 +1,4 @@
-#ifndef DEBUGDIALOG_HPP
-#define DEBUGDIALOG_HPP
-
+#pragma once
 #include <QCheckBox>
 #include <QDialog>
 #include <QLabel>

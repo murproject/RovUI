@@ -1,5 +1,4 @@
-#ifndef LOGWIDGET_HPP
-#define LOGWIDGET_HPP
+#pragma once
 
 #include "RovDataTypes.hpp"
 
@@ -28,5 +27,3 @@ private:
 
     bool m_isStarted = false;
 };
-
-#endif // LOGWIDGET_HPP
