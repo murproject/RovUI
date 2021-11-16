@@ -2,6 +2,7 @@
 
 #include <QCheckBox>
 #include <QComboBox>
+#include <QLabel>
 #include <QDialog>
 #include <QSettings>
 #include <QWidget>
@@ -44,6 +45,11 @@ public:
 
     int manipulatorCloseButton();
     void setCloseButton(int button);
+
+    int cameraSelectButton();
+    void setCameraSelectButton(int button);
+
+    void updateJoystickTest();
 signals:
 
 private:
@@ -62,6 +68,7 @@ private:
     QScopedPointer<QComboBox> m_openManipulatorList;
     QScopedPointer<QComboBox> m_closeManipulatorList;
     QScopedPointer<QComboBox> m_rotateManipulatorList;
+    QScopedPointer<QComboBox> m_cameraSelectButtonList;
 
     QScopedPointer<QCheckBox> m_wAxisInv;
     QScopedPointer<QCheckBox> m_xAxisInv;
@@ -70,6 +77,8 @@ private:
     QScopedPointer<QCheckBox> m_servoXInv;
     QScopedPointer<QCheckBox> m_servoYInv;
     QScopedPointer<QCheckBox> m_manipulatorInv;
+
+    QScopedPointer<QLabel> m_joystickStatus;
 
     sf::Joystick::Axis m_xAxis;
     sf::Joystick::Axis m_yAxis;
@@ -81,6 +90,7 @@ private:
 
     int m_openButton;
     int m_closeButton;
+    int m_cameraSelectButton;
 
     bool m_isXInv = false;
     bool m_isYInv = false;

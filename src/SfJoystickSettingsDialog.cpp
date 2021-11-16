@@ -16,6 +16,7 @@ SfJoystickSettingsDialog::SfJoystickSettingsDialog(QWidget* parent)
     , m_openManipulatorList(new QComboBox(this))
     , m_closeManipulatorList(new QComboBox(this))
     , m_rotateManipulatorList(new QComboBox(this))
+    , m_cameraSelectButtonList(new QComboBox(this))
     , m_wAxisInv(new QCheckBox(this))
     , m_xAxisInv(new QCheckBox(this))
     , m_yAxisInv(new QCheckBox(this))
@@ -23,6 +24,7 @@ SfJoystickSettingsDialog::SfJoystickSettingsDialog(QWidget* parent)
     , m_servoXInv(new QCheckBox(this))
     , m_servoYInv(new QCheckBox(this))
     , m_manipulatorInv(new QCheckBox(this))
+    , m_joystickStatus(new QLabel(this))
 
 {
     readSettings();
@@ -198,6 +200,20 @@ void SfJoystickSettingsDialog::setCloseButton(int button)
     m_settings->endGroup();
 }
 
+int SfJoystickSettingsDialog::cameraSelectButton()
+{
+    return m_cameraSelectButton;
+}
+
+void SfJoystickSettingsDialog::setCameraSelectButton(int button)
+{
+    m_settings->beginGroup("Joystick");
+    m_settings->setValue("JoystickCameraSelectButton", button);
+    m_cameraSelectButton = button;
+    m_settings->endGroup();
+}
+
+
 void SfJoystickSettingsDialog::readSettings()
 {
     sf::Joystick::update();
@@ -226,8 +242,9 @@ void SfJoystickSettingsDialog::readSettings()
     m_isManipulatorInv = m_settings->value("JoystickManipulatorAxisInv", false).toBool();
     m_manipulatorInv->setChecked(m_isManipulatorInv);
 
-    m_openButton = m_settings->value("JoystickOpenButton", 1).toInt();
-    m_closeButton = m_settings->value("JoystickCloseButton", 0).toInt();
+    m_openButton = m_settings->value("JoystickOpenButton", 2).toInt();
+    m_closeButton = m_settings->value("JoystickCloseButton", 3).toInt();
+    m_cameraSelectButton = m_settings->value("JoystickCameraSelectButton", 0).toInt();
 
     m_settings->endGroup();
 }
@@ -261,7 +278,7 @@ void SfJoystickSettingsDialog::createLayout()
 
     auto createButtonBox = [this](QComboBox* box) {
         for (size_t buttons = 0; buttons < sf::Joystick::getButtonCount(0); ++buttons) {
-            box->addItem(QString("Копка #%1").arg(buttons));
+            box->addItem(QString("Кнопка #%1").arg(buttons));
         }
     };
 
@@ -274,6 +291,7 @@ void SfJoystickSettingsDialog::createLayout()
     createBox(m_rotateManipulatorList.data());
     createButtonBox(m_openManipulatorList.data());
     createButtonBox(m_closeManipulatorList.data());
+    createButtonBox(m_cameraSelectButtonList.data());
 
     addToLayout(m_wAxisList.data(), QString(tr("Тяга на ось W:")), layout, m_wAxisInv.data());
     addToLayout(m_xAxisList.data(), QString(tr("Тяга на ось X:")), layout, m_xAxisInv.data());
@@ -284,6 +302,9 @@ void SfJoystickSettingsDialog::createLayout()
     addToLayout(m_rotateManipulatorList.data(), QString(tr("Поворот манипулятора:")), layout, m_manipulatorInv.data());
     addButtonsToLayout(m_openManipulatorList.data(), QString(tr("Открыть манипулятор:")), layout);
     addButtonsToLayout(m_closeManipulatorList.data(), QString(tr("Закрыть манипулятор:")), layout);
+    addButtonsToLayout(m_cameraSelectButtonList.data(), QString(tr("Переключить камеру:")), layout);
+
+    layout->addWidget(m_joystickStatus.data());
 
     m_wAxisList.data()->setCurrentIndex(static_cast<int>(wAxis()));
     m_xAxisList.data()->setCurrentIndex(static_cast<int>(xAxis()));
@@ -292,11 +313,34 @@ void SfJoystickSettingsDialog::createLayout()
     m_servoXList.data()->setCurrentIndex(static_cast<int>(servoXAxis()));
     m_servoYList.data()->setCurrentIndex(static_cast<int>(servoYAxis()));
     m_rotateManipulatorList.data()->setCurrentIndex(static_cast<int>(manipulatorAxis()));
+    m_openManipulatorList.data()->setCurrentIndex(static_cast<int>(m_openButton));
+    m_closeManipulatorList.data()->setCurrentIndex(static_cast<int>(m_closeButton));
+    m_cameraSelectButtonList.data()->setCurrentIndex(static_cast<int>(m_cameraSelectButton));
     setLayout(layout);
 }
 
+void SfJoystickSettingsDialog::updateJoystickTest() {
+    QString status = "Нажатые оси и кнопки:\n";
+
+    for (int i = 0; i < sf::Joystick::AxisCount; i++) {
+        int pos = (int)sf::Joystick::getAxisPosition(0, static_cast<sf::Joystick::Axis>(i));
+        if (abs(pos) > 50) {
+            status.append(QString("Ось%2%1 ").arg(QString::number(i), QString(pos > 0 ? "+" : "-")));
+        }
+    }
+
+    for (int i = 0; i < 8; i++) {
+        int pos = (int)sf::Joystick::isButtonPressed(0, i);
+        if (abs(pos) > 0) {
+            status.append(QString("Кнопка_%1 ").arg(i));
+        }
+    }
+
+    m_joystickStatus->setText(status);
+}
+
 void SfJoystickSettingsDialog::createConnections()
-{
+{    
     QObject::connect(m_wAxisList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         this->setWAxis(static_cast<sf::Joystick::Axis>(index), m_wAxisInv.data()->isChecked());
     });
@@ -331,6 +375,10 @@ void SfJoystickSettingsDialog::createConnections()
 
     QObject::connect(m_closeManipulatorList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
         this->setCloseButton(index);
+    });
+
+    QObject::connect(m_cameraSelectButtonList.data(), QOverload<int>::of(&QComboBox::currentIndexChanged), [this](int index) {
+        this->setCameraSelectButton(index);
     });
 
     QObject::connect(m_wAxisInv.data(), &QCheckBox::stateChanged, [this](int index) {

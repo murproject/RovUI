@@ -20,17 +20,8 @@ private:
 
     QScopedPointer<QCheckBox> m_isDebug;
 
-    QScopedPointer<QSlider> m_thrusterOneSlider;
-    QScopedPointer<QSlider> m_thrusterTwoSlider;
-    QScopedPointer<QSlider> m_thrusterThreeSlider;
-    QScopedPointer<QSlider> m_thrusterFourSlider;
-    QScopedPointer<QSlider> m_thrusterFiveSlider;
-    QScopedPointer<QSlider> m_thrusterSixSlider;
+    static constexpr int m_thurstersCount = 8;
+    const QString sliderTemplate = tr("Движитель %1: %2");
+    QList<QPair<QSharedPointer<QSlider>, QSharedPointer<QLabel>>> m_thrusterSliders;
 
-    QScopedPointer<QLabel> m_thrusterOneLabel;
-    QScopedPointer<QLabel> m_thrusterTwoLabel;
-    QScopedPointer<QLabel> m_thrusterThreeLabel;
-    QScopedPointer<QLabel> m_thrusterFourLabel;
-    QScopedPointer<QLabel> m_thrusterFiveLabel;
-    QScopedPointer<QLabel> m_thrusterSixLabel;
 };

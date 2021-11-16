@@ -1,8 +1,10 @@
 #include "MainWindow.hpp"
+#include "RovSingleton.hpp"
 
 #include <QDockWidget>
 #include <QMenu>
 #include <QMenuBar>
+#include <QApplication>
 
 QTextEdit* MainWindow::logWidget = nullptr;
 
@@ -32,6 +34,7 @@ void MainWindow::createMenus()
     QMenu* camera = menuBar()->addMenu(tr("Камера"));
     camera->addAction(m_startCameraAct.data());
     camera->addAction(m_stopCameraAct.data());
+    camera->addAction(m_switchCameraAct.data());
 
     QMenu* settings = menuBar()->addMenu(tr("Настройки"));
     settings->addAction(m_openJoystickSettings.data());
@@ -53,6 +56,7 @@ void MainWindow::createDocks()
     logDock->setObjectName("LogDockWidget");
     logDock->setFeatures(QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable);
     logDock->setWidget(logWidget);
+    logWidget->setFont(QFont("Consolas"));
     addDockWidget(Qt::LeftDockWidgetArea, logDock);
     view->addAction(logDock->toggleViewAction());
 
@@ -88,6 +92,10 @@ void MainWindow::createConnections()
         m_cameraWidget->stopCapture();
     });
 
+    QObject::connect(m_switchCameraAct.data(), &QAction::triggered, [this](bool) {
+        RovSingleton::instance()->control().cameraIndex = (RovSingleton::instance()->control().cameraIndex + 1) % 2;
+    });
+
     QObject::connect(m_openJoystickSettings.data(), &QAction::triggered, [this](bool) {
         m_joystick.data()->settingsDialog()->show();
     });
@@ -101,6 +109,7 @@ void MainWindow::createActions()
 {
     m_startCameraAct.reset(new QAction(tr("Начать захват изображения"), this));
     m_stopCameraAct.reset(new QAction(tr("Остановить захват изображения"), this));
+    m_switchCameraAct.reset(new QAction(tr("Переключить камеру (мультиплексор)"), this));
     m_openJoystickSettings.reset(new QAction(tr("Настройки джойстика"), this));
     m_openDebugDialog.reset(new QAction(tr("Отладка движителей"), this));
 }

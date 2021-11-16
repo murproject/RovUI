@@ -1,4 +1,3 @@
-
 # SFML
 
 SFML - Copyright (C) 2007-2018 Laurent Gomila - laurent@sfml-dev.org
@@ -19,4 +18,3 @@ Permission is granted to anyone to use this software for any purpose, including 
   * _libogg_ is under the BSD license
   * _libvorbis_ is under the BSD license
   * _libflac_ is under the BSD license
-

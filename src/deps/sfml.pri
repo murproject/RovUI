@@ -9,17 +9,17 @@ win32 {
         LIBS += -L"$$PWD\..\..\thirdpaty\sfml\lib"
         LIBS += \
             -lsfml-main \
-            -lsfml-system-2 \
-            -lsfml-window-2
+            -lsfml-system \
+            -lsfml-window
         LIBS ~= s,/,\\,g
     }
 
     CONFIG(debug, debug | release) : {
         LIBS += -L"$$PWD\..\..\thirdpaty\sfml\lib"
         LIBS += \
-            -lsfml-main \
-            -lsfml-system-2 \
-            -lsfml-window-2
+            -lsfml-main-d \
+            -lsfml-system-d \
+            -lsfml-window-d
         LIBS ~= s,/,\\,g
     }
 }

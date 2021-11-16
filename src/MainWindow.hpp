@@ -31,6 +31,7 @@ private:
 
     QScopedPointer<QAction> m_startCameraAct;
     QScopedPointer<QAction> m_stopCameraAct;
+    QScopedPointer<QAction> m_switchCameraAct;
     QScopedPointer<QAction> m_openJoystickSettings;
     QScopedPointer<QAction> m_openDebugDialog;
 

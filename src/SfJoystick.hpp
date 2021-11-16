@@ -40,6 +40,7 @@ private:
     int m_manipulatorRotate = 0;
     int m_openManipulator = 0;
     int m_closeManipulator = 0;
+    bool m_camSelectOldState = false;
 
     enum { MinAxisValue = 10 };
 

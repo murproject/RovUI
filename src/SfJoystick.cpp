@@ -69,6 +69,8 @@ void SfJoystick::timerEvent(QTimerEvent*)
 
         m_manipulatorRotate = (int)sf::Joystick::getAxisPosition(0, m_joystickSettingsDialog.data()->manipulatorAxis());
         m_joystickSettingsDialog.data()->isManipulatorInvese() ? m_manipulatorRotate *= -1 : m_manipulatorRotate *= 1;
+
+        m_joystickSettingsDialog.data()->updateJoystickTest();
     }
 
     if (isConnected()) {
@@ -80,6 +82,15 @@ void SfJoystick::timerEvent(QTimerEvent*)
         RovSingleton::instance()->control().cameraRotation[1] = static_cast<qint8>(m_servoY);
         RovSingleton::instance()->control().manipulatorRotation = m_manipulatorRotate;
         RovSingleton::instance()->control().manipulatorOpenClose = sf::Joystick::isButtonPressed(0, m_joystickSettingsDialog.data()->manipulatorOpenButton()) - sf::Joystick::isButtonPressed(0, m_joystickSettingsDialog.data()->manipulatorCloseButton());
+
+        bool camSelectButtonState = sf::Joystick::isButtonPressed(0, m_joystickSettingsDialog.data()->cameraSelectButton());
+        if (m_camSelectOldState != camSelectButtonState) {
+            if (camSelectButtonState) {
+                RovSingleton::instance()->control().cameraIndex = (RovSingleton::instance()->control().cameraIndex + 1) % 2;
+            }
+            m_camSelectOldState = camSelectButtonState;
+        }
+
     } else {
         RovSingleton::instance()->control().axisW = static_cast<qint8>(0);
         RovSingleton::instance()->control().axisX = static_cast<qint8>(0);
@@ -89,6 +100,12 @@ void SfJoystick::timerEvent(QTimerEvent*)
         RovSingleton::instance()->control().cameraRotation[1] = static_cast<qint8>(0);
         RovSingleton::instance()->control().manipulatorRotation = 0;
     }
+
+//    qDebug() << "\tX: " << xAxis()
+//             << "\tY: " << yAxis()
+//             << "\tZ: " << zAxis()
+//             << "\tW: " << wAxis()
+//             << "\t cam: " << RovSingleton::instance()->control().cameraIndex;
 }
 
 bool SfJoystick::isConnected()

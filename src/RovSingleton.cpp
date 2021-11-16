@@ -45,11 +45,24 @@ void RovSingleton::createConnections()
 {
     QObject::connect(m_udpConnection.data(), &RovUdpConnection::dataReceived,
         [this](QByteArray datagram) {
-            RovTelimetry::RovTelimetryErrorCode ec = m_telimetry.fromRangerTelimetryMsg(datagram);
+            if (datagram.size() == 4 && quint8(datagram[0]) == RovHello::header_hello) {
+                m_telimetry.version = RovHello::getVersion(datagram);
+                return;
+            }
+
+            RovTelimetry::RovTelimetryErrorCode ec = RovTelimetry::RovTelimetryErrorCode::WrongDataSize; // TODO?
+
+            if (datagram.size() == 29) { // probably v1 telemetry msg
+                ec = m_telimetry.fromRangerTelimetryMsgV1(datagram);
+            } else if (quint8(datagram[0]) == RovTelimetry::header_telemetry) {
+                ec = m_telimetry.fromRangerTelimetryMsgV2(datagram);
+            }
+
             if (ec != RovTelimetry::RovTelimetryErrorCode::NoError) {
                 qInfo() << RovTelimetry::fromErrorToString(ec);
                 return;
             }
+
             emit telimetryUpdated();
         });
 
@@ -59,7 +72,13 @@ void RovSingleton::createConnections()
             m_controlData.axisX *= m_scaleFactor;
             m_controlData.axisZ *= m_scaleFactor;
             m_controlData.axisY *= m_scaleFactor;
-            m_udpConnection->transmitDatagram(m_controlData.toRangerControlMsg());
+
+            if (m_telimetry.version == 2) {
+                auto data = m_controlData.toRangerControlMsgV2();
+                m_udpConnection->transmitDatagram(data);
+            } else {
+                m_udpConnection->transmitDatagram(m_controlData.toRangerControlMsgV1());
+            }
         }
     });
 }
