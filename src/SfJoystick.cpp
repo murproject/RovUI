@@ -68,6 +68,7 @@ void SfJoystick::timerEvent(QTimerEvent*)
         m_joystickSettingsDialog.data()->isServoYInvese() ? m_servoY *= -1 : m_servoY *= 1;
 
         m_manipulatorRotate = (int)sf::Joystick::getAxisPosition(0, m_joystickSettingsDialog.data()->manipulatorAxis());
+        m_manipulatorRotate = abs(m_manipulatorRotate) > 50 ? m_manipulatorRotate : 0;
         m_joystickSettingsDialog.data()->isManipulatorInvese() ? m_manipulatorRotate *= -1 : m_manipulatorRotate *= 1;
 
         m_joystickSettingsDialog.data()->updateJoystickTest();
